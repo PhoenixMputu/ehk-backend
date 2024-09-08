@@ -22,14 +22,27 @@ export class MailerService {
   }
 
   private async renderTemplate(templateName: string, variables: object) {
-    const filePath = path.join(__dirname, `../templates/${templateName}.hbs`);
+    const templateDir =
+      process.env.NODE_ENV === 'production'
+        ? path.join(__dirname, '../templates')
+        : path.join(__dirname, '../../src/templates');
+
+    const filePath = path.join(templateDir, `${templateName}.hbs`);
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Template file not found: ${filePath}`);
+    }
+
     const source = fs.readFileSync(filePath, 'utf8');
     const template = handlebars.compile(source);
     return template(variables);
   }
 
   async sendSignupConfirmation(email: string, code: string) {
-    const html = await this.renderTemplate('signup-confirmation', { email, code });
+    const html = await this.renderTemplate('signup-confirmation', {
+      email,
+      code,
+    });
 
     (await this.transporter()).sendMail({
       from: '"No Reply" <app@localhost.com>',

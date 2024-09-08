@@ -4,8 +4,6 @@ export class SignupDto {
   readonly lastName: string;
   @IsNotEmpty()
   readonly firstName: string;
-  @IsNotEmpty()
-  readonly username: string;
   @IsEmail()
   readonly email: string;
   @IsNotEmpty()

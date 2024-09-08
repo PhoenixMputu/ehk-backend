@@ -20,4 +20,9 @@ export class AuthController {
   ) {
     return this.authService.signin(email, password);
   }
+
+  @Post('verify-user')
+  async verifyUser(@Body() email: string) {
+    return this.authService.existsUser(email);
+  }
 }

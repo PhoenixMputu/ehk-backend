@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   async signup(signupDto: SignupDto) {
-    const { firstName, lastName, sex, email, avatar, password, birthday, province, phoneNumber, username } = signupDto;
+    const { firstName, lastName, sex, email, avatar, password, birthday, province, phoneNumber } = signupDto;
 
     const existingUser = await this.existsUser(email);
     if (existingUser) {
@@ -40,11 +40,24 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.prismaService.user.create({
-      data: { avatar, firstName, lastName, sex, email, password: hashedPassword, birthday, province, phoneNumber, username },
+      data: { avatar, firstName, lastName, sex, email, password: hashedPassword, birthday: new Date(birthday), province, phoneNumber },
     });
     
     await this.mailerService.sendSignupConfirmation(email, validationCode);
-    return this.generateToken(user);
+    return {
+      user: {
+        id: user.id,
+        lastName: user.lastName,
+        firstName: user.firstName,
+        sex: user.sex,
+        avatar: user.avatar,
+        birthday: user.birthday,
+        email: user.email,
+        province: user.province,
+        phoneNumber: user.phoneNumber
+      },
+      access_token: this.generateToken(user)
+    }
   }
 
   async resendValidationCode(email: string) {
@@ -76,8 +89,6 @@ export class AuthService {
 
   private generateToken(user: any) {
     const payload = { sub: user.id, email: user.email };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    return this.jwtService.sign(payload);
   }
 }

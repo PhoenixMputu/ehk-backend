@@ -23,7 +23,6 @@ model User {
   firstName   String
   lastName    String
   sex         String
-  username    String
   avatar      String
   phoneNumber String
   birthday    DateTime
