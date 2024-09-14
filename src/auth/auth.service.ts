@@ -26,6 +26,14 @@ export class AuthService {
     });
   }
 
+  async verifyUser(email: string) {
+    const user = await this.existsUser(email);
+    
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    
+    return user;
+  }
+
   async signup(signupDto: SignupDto) {
     const { firstName, lastName, sex, email, avatar, password, birthday, province, phoneNumber } = signupDto;
 
