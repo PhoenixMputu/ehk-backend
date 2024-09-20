@@ -21,7 +21,7 @@ export class AuthController {
     return this.authService.signin(email, password);
   }
 
-  @Get('verify-user/:email')
+  @Get('verify-user')
   async verifyUser(@Query('email') email: string) {
     return this.authService.verifyUser(email);
   }
