@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 import { SignupDto } from './dto/signup.dto';
@@ -22,7 +22,7 @@ export class AuthController {
   }
 
   @Get('verify-user/:email')
-  async verifyUser(@Param('email') email: string) {
+  async verifyUser(@Query('email') email: string) {
     return this.authService.verifyUser(email);
   }
 }
