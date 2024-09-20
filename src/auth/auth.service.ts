@@ -27,11 +27,7 @@ export class AuthService {
   }
 
   async verifyUser(email: string) {
-    const user = await this.existsUser(email);
-    
-    if (!user) throw new NotFoundException('Utilisateur non trouvé');
-    
-    return user;
+    return await this.existsUser(email);
   }
 
   async signup(signupDto: SignupDto) {
