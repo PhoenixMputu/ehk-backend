@@ -7,7 +7,8 @@ export class CloudinaryController {
 
   @Get('upload')
   async uploadImage(): Promise<any> {
-    const imageUrl = 'https://cdn.pixabay.com/photo/2015/03/26/09/42/breakfast-690128_1280.jpg';
+    const imageUrl =
+      'https://res.cloudinary.com/dywvbuuqw/image/upload/v1716557822/Vodacom/fqz6skllf0him7wcfwvj.png';
     const result = await this.cloudinaryService.uploadImage(imageUrl);
     return result;
   }
