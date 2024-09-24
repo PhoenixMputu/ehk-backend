@@ -6,7 +6,7 @@ export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 
   @Get('upload')
-  async uploadImage(@Query('email') imageUrl: string): Promise<any> {
+  async uploadImage(@Query('imageUri') imageUrl: string): Promise<any> {
     const result = await this.cloudinaryService.uploadImage(imageUrl);
     return result;
   }
