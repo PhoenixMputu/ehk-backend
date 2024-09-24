@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
-import { v2 as cloudinary } from 'cloudinary';
+import { Readable } from 'stream';
 
 @Injectable()
 export class CloudinaryService {
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     cloudinary.config({
       cloud_name: this.configService.get('CLOUDINARY_CLOUD_NAME'),
       api_key: this.configService.get('CLOUDINARY_API_KEY'),
@@ -12,14 +13,20 @@ export class CloudinaryService {
     });
   }
 
-  async uploadImage(file: string): Promise<any> {
-    try {
-      const result = await cloudinary.uploader.upload(file, {
-        resource_type: 'image',
-      });
-      return result;
-    } catch (error) {
-      throw new Error(`Image upload failed: ${error.message}`);
-    }
+  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'auto' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+
+      const readableStream = new Readable();
+      readableStream.push(file.buffer);
+      readableStream.push(null);
+      readableStream.pipe(uploadStream);
+    });
   }
 }
