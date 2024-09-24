@@ -15,7 +15,7 @@ export class SignupDto {
   @IsNotEmpty()
   readonly birthday: string;
   @IsNotEmpty()
-  readonly province: string;
+  readonly province: number;
   @IsNotEmpty()
   readonly password: string;
 }
