@@ -27,7 +27,7 @@ model User {
   avatar      String
   phoneNumber String
   birthday    DateTime
-  province    String
+  province    Int       // Province est maintenant un nombre
   email       String    @unique
   password    String
   state       State     @default(pending)
