@@ -10,6 +10,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SignupDto } from './dto/signup.dto';
 import { ValidationService } from '../speakeasy/validation.service';
 import { MailerService } from '../mailer/mailer.service';
+import { ConfirmEmailDto } from './dto/confirmEmail.dto';
+import { access } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +33,17 @@ export class AuthService {
   }
 
   async signup(signupDto: SignupDto) {
-    const { firstName, lastName, sex, email, avatar, password, birthday, province, phoneNumber } = signupDto;
+    const {
+      firstName,
+      lastName,
+      sex,
+      email,
+      avatar,
+      password,
+      birthday,
+      province,
+      phoneNumber,
+    } = signupDto;
 
     const existingUser = await this.existsUser(email);
     if (existingUser) {
@@ -44,9 +56,19 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.prismaService.user.create({
-      data: { avatar, firstName, lastName, sex, email, password: hashedPassword, birthday: new Date(birthday), province, phoneNumber },
+      data: {
+        avatar,
+        firstName,
+        lastName,
+        sex,
+        email,
+        password: hashedPassword,
+        birthday: new Date(birthday),
+        province,
+        phoneNumber,
+      },
     });
-    
+
     await this.mailerService.sendSignupConfirmation(email, validationCode);
     return {
       user: {
@@ -58,16 +80,16 @@ export class AuthService {
         birthday: user.birthday,
         email: user.email,
         province: user.province,
-        phoneNumber: user.phoneNumber
+        phoneNumber: user.phoneNumber,
       },
-      access_token: this.generateToken(user)
-    }
+      access_token: this.generateToken(user),
+    };
   }
 
   async resendValidationCode(email: string) {
     const user = await this.existsUser(email);
     if (!user) {
-      throw new NotFoundException("Utilisateur non trouvé");
+      throw new NotFoundException('Utilisateur non trouvé');
     }
 
     const validationCode = this.validationService.generateValidationCode();
@@ -94,5 +116,39 @@ export class AuthService {
   private generateToken(user: any) {
     const payload = { sub: user.id, email: user.email };
     return this.jwtService.sign(payload);
+  }
+
+  async confirmEmail(confirmEmailDto: ConfirmEmailDto) {
+    const { email, code, token } = confirmEmailDto;
+    const user = await this.prismaService.user.findUnique({
+      where: { email, state: 'pending' },
+    });
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    const isCodeValid = this.validationService.verifyValidationCode(code);
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Code invalide');
+    }
+    await this.prismaService.user.update({
+      where: { email },
+      data: { state: 'active' },
+    });
+    return {
+      access_token: token,
+      message: 'Email confirmé',
+      user: {
+        id: user.id,
+        lastName: user.lastName,
+        firstName: user.firstName,
+        sex: user.sex,
+        avatar: user.avatar,
+        birthday: user.birthday,
+        email: user.email,
+        province: user.province,
+        phoneNumber: user.phoneNumber,
+      },
+    }
   }
 }
