@@ -12,7 +12,7 @@ export class ValidationService {
     });
   }
 
-  verifyValidationCode(token: string, _validationCode: string): boolean {
+  verifyValidationCode(token: string): boolean {
     return speakeasy.totp.verify({
       secret: process.env.SECRET_KEY!,
       encoding: 'base32',

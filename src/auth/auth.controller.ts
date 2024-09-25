@@ -1,7 +1,9 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 import { SignupDto } from './dto/signup.dto';
+import { ConfirmEmailDto } from './dto/confirmEmail.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -24,5 +26,11 @@ export class AuthController {
   @Get('verify-user')
   async verifyUser(@Query('email') email: string) {
     return this.authService.verifyUser(email);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('confirm-email')
+  async confirmEmail(@Body() confirmEmailDto: ConfirmEmailDto) {
+    return this.authService.confirmEmail(confirmEmailDto);
   }
 }
